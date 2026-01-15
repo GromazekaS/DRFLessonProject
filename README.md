@@ -1,2 +1,4 @@
 # DRFLessonProject
 Учебный проект по DjangoResFramework
+
+30.1 Вьюсеты и дженерики
