@@ -1,0 +1,352 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "email": "user1@example.com",
+      "first_name": "Иван",
+      "last_name": "Петров",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79161234567",
+      "city": "Москва",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+      "email": "user2@example.com",
+      "first_name": "Анна",
+      "last_name": "Сидорова",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79162345678",
+      "city": "Санкт-Петербург",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+      "email": "user3@example.com",
+      "first_name": "Сергей",
+      "last_name": "Иванов",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79163456789",
+      "city": "Новосибирск",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+      "email": "user4@example.com",
+      "first_name": "Мария",
+      "last_name": "Кузнецова",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79164567890",
+      "city": "Екатеринбург",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 5,
+    "fields": {
+      "email": "user5@example.com",
+      "first_name": "Дмитрий",
+      "last_name": "Смирнов",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79165678901",
+      "city": "Казань",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 6,
+    "fields": {
+      "email": "user6@example.com",
+      "first_name": "Ольга",
+      "last_name": "Попова",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79166789012",
+      "city": "Нижний Новгород",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 7,
+    "fields": {
+      "email": "user7@example.com",
+      "first_name": "Алексей",
+      "last_name": "Васильев",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79167890123",
+      "city": "Самара",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 8,
+    "fields": {
+      "email": "user8@example.com",
+      "first_name": "Елена",
+      "last_name": "Федорова",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79168901234",
+      "city": "Омск",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 9,
+    "fields": {
+      "email": "user9@example.com",
+      "first_name": "Андрей",
+      "last_name": "Морозов",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79169012345",
+      "city": "Челябинск",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 10,
+    "fields": {
+      "email": "user10@example.com",
+      "first_name": "Татьяна",
+      "last_name": "Новикова",
+      "password": "pbkdf2_sha256$600000$abcdefgh12345678$...",
+      "phone": "+79160123456",
+      "city": "Ростов-на-Дону",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 1,
+    "fields": {
+      "title": "Python для начинающих",
+      "description": "Полный курс по основам программирования на Python"
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 2,
+    "fields": {
+      "title": "Web-разработка на Django",
+      "description": "Создание веб-приложений с использованием Django"
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 3,
+    "fields": {
+      "title": "JavaScript и React",
+      "description": "Современный фронтенд на JavaScript и React"
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 4,
+    "fields": {
+      "title": "Базы данных и SQL",
+      "description": "Работа с базами данных и SQL запросами"
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 5,
+    "fields": {
+      "title": "Машинное обучение",
+      "description": "Введение в машинное обучение и нейронные сети"
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 1,
+    "fields": {
+      "title": "Введение в Python",
+      "description": "Основы языка Python",
+      "video_link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "course": 1
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 2,
+    "fields": {
+      "title": "Переменные и типы данных",
+      "description": "Работа с переменными в Python",
+      "video_link": "https://www.youtube.com/watch?v=abcdefghijk",
+      "course": 1
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 3,
+    "fields": {
+      "title": "Условные операторы",
+      "description": "Использование if/else в Python",
+      "video_link": "https://www.youtube.com/watch?v=lmnoabcdef",
+      "course": 1
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 4,
+    "fields": {
+      "title": "Циклы в Python",
+      "description": "Использование циклов for и while",
+      "video_link": "https://www.youtube.com/watch?v=xyz12345678",
+      "course": 1
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 5,
+    "fields": {
+      "title": "Функции в Python",
+      "description": "Создание и использование функций",
+      "video_link": "https://www.youtube.com/watch?v=qwertyuiop",
+      "course": 1
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 6,
+    "fields": {
+      "title": "Основы Django",
+      "description": "Введение в Django фреймворк",
+      "video_link": "https://www.youtube.com/watch?v=asdfghjkl",
+      "course": 2
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 7,
+    "fields": {
+      "title": "Модели в Django",
+      "description": "Создание моделей данных",
+      "video_link": "https://www.youtube.com/watch?v=zxcvbnm123",
+      "course": 2
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 8,
+    "fields": {
+      "title": "Основы JavaScript",
+      "description": "Введение в JavaScript",
+      "video_link": "https://www.youtube.com/watch?v=0987654321",
+      "course": 3
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 9,
+    "fields": {
+      "title": "Введение в React",
+      "description": "Основы библиотеки React",
+      "video_link": "https://www.youtube.com/watch?v=poiuytrewq",
+      "course": 3
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 10,
+    "fields": {
+      "title": "Основы SQL",
+      "description": "Введение в язык SQL",
+      "video_link": "https://www.youtube.com/watch?v=lkjhgfdsaz",
+      "course": 4
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "payment_date": "2024-01-15T10:30:00Z",
+      "paid_course": 1,
+      "paid_lesson": null,
+      "amount": "10000.00",
+      "payment_method": "transfer"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 2,
+    "fields": {
+      "user": 1,
+      "payment_date": "2024-01-16T11:45:00Z",
+      "paid_course": null,
+      "paid_lesson": 1,
+      "amount": "1500.00",
+      "payment_method": "cash"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 3,
+    "fields": {
+      "user": 2,
+      "payment_date": "2024-01-14T09:15:00Z",
+      "paid_course": 2,
+      "paid_lesson": null,
+      "amount": "12000.00",
+      "payment_method": "transfer"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 4,
+    "fields": {
+      "user": 2,
+      "payment_date": "2024-01-17T14:20:00Z",
+      "paid_course": null,
+      "paid_lesson": 6,
+      "amount": "1800.00",
+      "payment_method": "cash"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 5,
+    "fields": {
+      "user": 3,
+      "payment_date": "2024-01-13T16:30:00Z",
+      "paid_course": 3,
+      "paid_lesson": null,
+      "amount": "15000.00",
+      "payment_method": "transfer"
+    }
+  }
+]
