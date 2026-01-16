@@ -5,6 +5,7 @@ from .views import (
     LessonCreateView, LessonListView, LessonRetrieveView, LessonUpdateView, LessonDestroyView
 )
 
+app_name = 'courses'
 
 router = DefaultRouter()
 router.register(r'courses', CourseViewSet)
