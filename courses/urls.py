@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     CourseViewSet,
-    LessonCreateView, LessonListView, LessonRetrieveView, LessonUpdateView, LessonDestroyView
+    LessonCreateView, LessonListView, LessonRetrieveView, LessonUpdateView, LessonDestroyView,
 )
 
 app_name = 'courses'
