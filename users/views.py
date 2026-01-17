@@ -15,22 +15,12 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
     # Подключаем фильтры
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_class = PaymentFilter
 
-    # Поля, по которым возможна сортировка
+    # Поля для фильтрации (простые)
+    filterset_fields = ['paid_course', 'paid_lesson', 'payment_method']
+
+    # Поля для сортировки
     ordering_fields = ['payment_date', 'amount']
 
-    # Сортировка по умолчанию (последние платежи сначала)
+    # Сортировка по умолчанию
     ordering = ['-payment_date']
-
-    def get_queryset(self):
-        """
-        Дополнительная фильтрация (например, по текущему пользователю)
-        """
-        queryset = super().get_queryset()
-
-        # Пример: фильтрация только платежей текущего пользователя
-        # if self.request.user.is_authenticated:
-        #     queryset = queryset.filter(user=self.request.user)
-
-        return queryset
