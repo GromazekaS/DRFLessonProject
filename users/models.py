@@ -7,7 +7,18 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='Телефон')
     city = models.CharField(max_length=100, blank=True, null=True, verbose_name='Город')
     avatar = models.ImageField(upload_to='users/avatars/', blank=True, null=True, verbose_name='Аватарка')
+    enrolled_courses = models.ManyToManyField(
+        'courses.Course',
+        related_name='enrolled_courses',
+        blank=True
+    )
 
+    # Если пользователь может быть привязан к урокам (например, как преподаватель)
+    enrolled_lessons = models.ManyToManyField(
+        'courses.Lesson',
+        related_name='enrolled_lessons',
+        blank=True
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 

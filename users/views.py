@@ -1,10 +1,26 @@
+from django.db.models import Prefetch
 from rest_framework import viewsets
-from .models import Payment
-from .serializers import PaymentSerializer
+from .models import Payment, User
+from courses.models import Course
+from .serializers import PaymentSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from .filters import PaymentFilter
 
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        # Оптимизация запросов для избежания N+1
+        return User.objects.prefetch_related(
+            Prefetch(
+                'enrolled_courses',
+                queryset=Course.objects.prefetch_related('lessons')
+            ),
+            'enrolled_lessons',
+            'payments'
+        ).all()
 
 class PaymentViewSet(viewsets.ModelViewSet):
     """
