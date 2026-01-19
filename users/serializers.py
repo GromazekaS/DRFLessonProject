@@ -40,39 +40,48 @@ class PaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'payment_date']
 
 
+class UserPublicSerializer(serializers.ModelSerializer):
+    """
+    Упрощенный сериализатор для отображения в списке пользователей (для модераторов).
+    Не включает чувствительные данные.
+    """
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'phone', 'city', 'avatar']
+
 class UserSerializer(serializers.ModelSerializer):
-    enrolled_courses = serializers.SerializerMethodField()
-    enrolled_lessons = serializers.SerializerMethodField()
+    """
+    Полный сериализатор для владельца и модераторов.
+    """
+    enrolled_courses = CourseSerializer(many=True, read_only=True)
+    enrolled_lessons = LessonSerializer(many=True, read_only=True)
     payments = PaymentSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'phone', 'city', 'avatar',
+            'id', 'email', 'password', 'phone', 'city', 'avatar',
             'enrolled_courses', 'enrolled_lessons', 'payments'
         ]
+        extra_kwargs = {
+            'password': {'write_only': True}  # Пароль не отображается при чтении
+        }
 
-    def get_enrolled_courses(self, obj):
-        """Получаем курсы из платежей пользователя"""
-        # Получаем ID оплаченных курсов
-        paid_course_ids = obj.payments.filter(
-            paid_course__isnull=False
-        ).values_list('paid_course_id', flat=True).distinct()
+    def create(self, validated_data):
+        """ Создание пользователя с хешированием пароля. """
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
 
-        # Получаем объекты курсов
-        courses = Course.objects.filter(id__in=paid_course_ids)
-
-        return CourseSerializer(courses, many=True, context=self.context).data
-
-    def get_enrolled_lessons(self, obj):
-        """Получаем уроки из платежей пользователя"""
-        # Получаем ID оплаченных уроков
-        paid_lesson_ids = obj.payments.filter(
-            paid_lesson__isnull=False
-        ).values_list('paid_lesson_id', flat=True).distinct()
-
-        # Получаем объекты уроков
-        lessons = Lesson.objects.filter(id__in=paid_lesson_ids)
-
-        return LessonSerializer(lessons, many=True, context=self.context).data
-
+    def update(self, instance, validated_data):
+        """ Обновление пользователя с хешированием пароля при изменении. """
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance

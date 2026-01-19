@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PaymentViewSet, UserViewSet
+from .views import PaymentViewSet, UserViewSet, UserRegistrationView
 from rest_framework.routers import DefaultRouter
 
 app_name = 'users'  # Пространство имен приложения
@@ -9,5 +9,5 @@ router.register(r'payments', PaymentViewSet, basename='payment')
 router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
-
+    path('register/', UserRegistrationView.as_view(), name='user-register'),
               ] + router.urls
