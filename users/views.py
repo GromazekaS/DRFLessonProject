@@ -1,4 +1,7 @@
 from django.db.models import Prefetch
+from rest_framework.generics import get_object_or_404
+from rest_framework.views import APIView
+
 from .models import Payment, User
 from courses.models import Course
 from .serializers import PaymentSerializer, UserSerializer
@@ -11,6 +14,13 @@ from rest_framework.response import Response
 # from django.contrib.auth.models import Group
 from .serializers import UserSerializer, UserPublicSerializer
 from .permissions import IsModerator, IsOwner  # Импортируем кастомные права
+from .services.stripe import (
+    create_stripe_product,
+    create_stripe_price,
+    create_stripe_checkout_session,
+    get_stripe_session_status
+)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -110,3 +120,101 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer  # Используем полный сериализатор, т.к. в нем есть create
     permission_classes = [permissions.AllowAny]  # Доступно без аутентификации
+
+
+class CreatePaymentView(APIView):
+    """Создание платежа для курса"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        course_id = request.data.get('course_id')
+
+        if not course_id:
+            return Response({'error': 'course_id обязателен'}, status=400)
+
+        course = get_object_or_404(Course, id=course_id)
+
+        try:
+            # 1. Создание продукта в Stripe
+            product_id = create_stripe_product(course.title)
+
+            # 2. Создание цены в Stripe
+            price_id = create_stripe_price(product_id, float(course.price))
+
+            # 3. Создание сессии оплаты
+            session_data = create_stripe_checkout_session(price_id, product_id)
+
+            # 4. Сохранение платежа в базе
+            payment = Payment.objects.create(
+                user=user,
+                paid_course=course,
+                amount=course.price,
+                payment_method='stripe',
+                stripe_product_id=product_id,
+                stripe_price_id=price_id,
+                stripe_session_id=session_data['session_id'],
+                payment_link=session_data['payment_link'],
+                status='pending'
+            )
+
+            return Response({
+                'payment_id': payment.id,
+                'payment_link': session_data['payment_link'],
+                'status': 'pending'
+            })
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+class PaymentStatusView(APIView):
+    """Проверка статуса платежа"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, payment_id):
+        payment = get_object_or_404(Payment, id=payment_id, user=request.user)
+
+        try:
+            status = get_stripe_session_status(payment.stripe_session_id)
+            payment.status = status
+            payment.save()
+
+            return Response({
+                'payment_id': payment.id,
+                'status': status,
+                'amount': payment.amount,
+                'course': payment.paid_course.title if payment.paid_course else None
+            })
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+class PaymentListView(generics.ListAPIView):
+    """Список платежей пользователя"""
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Payment.objects.filter(user=self.request.user).order_by('-payment_date')
+
+class PaymentSuccessAPIView(APIView):
+    """API эндпоинт для успешной оплаты"""
+    permission_classes = []  # Доступ без аутентификации
+
+    def get(self, request):
+        return Response({
+            'status': 'success',
+            'message': 'Платеж успешно завершен. Спасибо за покупку!',
+            'instruction': 'Вы можете проверить статус платежа в личном кабинете'
+        })
+
+class PaymentCancelAPIView(APIView):
+    """API эндпоинт для отмены оплаты"""
+    permission_classes = []  # Доступ без аутентификации
+
+    def get(self, request):
+        return Response({
+            'status': 'canceled',
+            'message': 'Платеж был отменен',
+            'instruction': 'Вы можете повторить оплату в любое время'
+        })

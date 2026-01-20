@@ -31,28 +31,26 @@ class User(AbstractUser):
 
 
 class Payment(models.Model):
-    # Способы оплаты
     CASH = 'cash'
     TRANSFER = 'transfer'
+    STRIPE = 'stripe'  # Новый способ оплаты
 
     PAYMENT_METHOD_CHOICES = [
         (CASH, 'Наличные'),
         (TRANSFER, 'Перевод на счет'),
+        (STRIPE, 'Stripe'),
     ]
 
-    # Основные поля
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='payments',
         verbose_name='Пользователь'
     )
-
     payment_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата оплаты'
     )
-
     paid_course = models.ForeignKey(
         'courses.Course',
         on_delete=models.SET_NULL,
@@ -61,7 +59,6 @@ class Payment(models.Model):
         related_name='payments',
         verbose_name='Оплаченный курс'
     )
-
     paid_lesson = models.ForeignKey(
         'courses.Lesson',
         on_delete=models.SET_NULL,
@@ -70,23 +67,52 @@ class Payment(models.Model):
         related_name='payments',
         verbose_name='Оплаченный урок'
     )
-
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         verbose_name='Сумма оплаты'
     )
-
     payment_method = models.CharField(
         max_length=20,
         choices=PAYMENT_METHOD_CHOICES,
         verbose_name='Способ оплаты'
     )
 
+    # Поля для Stripe
+    stripe_product_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='ID продукта в Stripe'
+    )
+    stripe_price_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='ID цены в Stripe'
+    )
+    stripe_session_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='ID сессии в Stripe'
+    )
+    payment_link = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='Ссылка на оплату'
+    )
+    status = models.CharField(
+        max_length=20,
+        default='created',
+        verbose_name='Статус платежа'
+    )
+
     class Meta:
         verbose_name = 'Платеж'
         verbose_name_plural = 'Платежи'
-        ordering = ['-payment_date']  # Сортировка по дате (новые первые)
+        ordering = ['-payment_date']
 
     def __str__(self):
-        return f"{self.payment_date} - {self.user.email} - {self.amount} - {self.payment_method}"
+        return f"{self.payment_date} - {self.user.email} - {self.amount}"

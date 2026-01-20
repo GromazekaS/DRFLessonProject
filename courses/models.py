@@ -6,7 +6,12 @@ class Course(models.Model):
     title = models.CharField(max_length=200, verbose_name='Название')
     preview = models.ImageField(upload_to='courses/previews/', blank=True, null=True, verbose_name='Превью')
     description = models.TextField(verbose_name='Описание', blank=True, null=True)
-
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=10000.00,
+        verbose_name='Стоимость курса'
+    )
     class Meta:
         verbose_name = 'Курс'
         verbose_name_plural = 'Курсы'
@@ -21,6 +26,12 @@ class Lesson(models.Model):
     preview = models.ImageField(upload_to='lessons/previews/', blank=True, null=True, verbose_name='Превью')
     video_link = models.URLField(verbose_name='Ссылка на видео', blank=True, null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons', verbose_name='Курс')
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=10000.00,
+        verbose_name='Стоимость курса'
+    )
 
     class Meta:
         verbose_name = 'Урок'
