@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Course, Lesson, Subscription
+from .pagination import CustomPageNumberPagination
 from .serializers import CourseSerializer, LessonSerializer
 from users.permissions import IsModeratorOrReadOnly  # Импортируем созданное право
 
@@ -14,6 +15,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.prefetch_related('lessons').all()
     serializer_class = CourseSerializer
+    pagination_class = CustomPageNumberPagination  # Добавляем пагинацию
     # Разрешаем чтение всем, запись - только модераторам и админам
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsModeratorOrReadOnly]
 
@@ -32,6 +34,7 @@ class LessonViewSet(viewsets.ModelViewSet):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    pagination_class = CustomPageNumberPagination  # Добавляем пагинацию
     # permission_classes = [permissions.IsAuthenticated] #permissions.IsAuthenticatedOrReadOnly, IsModeratorOrReadOnly]
 
     def get_permissions(self):
