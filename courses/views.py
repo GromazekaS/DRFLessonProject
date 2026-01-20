@@ -1,4 +1,6 @@
 from rest_framework import viewsets, permissions
+from rest_framework.permissions import AllowAny
+
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 from users.permissions import IsModeratorOrReadOnly  # Импортируем созданное право
@@ -27,12 +29,12 @@ class LessonViewSet(viewsets.ModelViewSet):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsModeratorOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated] #permissions.IsAuthenticatedOrReadOnly, IsModeratorOrReadOnly]
 
     def get_permissions(self):
         """
         Аналогично курсам: создавать уроки могут только админы.
         """
-        if self.action == 'create':
-            return [permissions.IsAuthenticated(), permissions.IsAdminUser()]
-        return super().get_permissions()
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return [] # [permissions.IsAuthenticated()] #, permissions.IsAdminUser()]
+        return [permissions.IsAuthenticated()]

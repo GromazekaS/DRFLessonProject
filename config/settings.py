@@ -59,7 +59,7 @@ REST_FRAMEWORK = {
             # 'rest_framework.authentication.SessionAuthentication', # Опционально
         ),
         'DEFAULT_PERMISSION_CLASSES': [
-            'rest_framework.permissions.IsAuthenticated', # По умолчанию требует аутентификации
+            'rest_framework.permissions.AllowAny', # По умолчанию требует аутентификации
         ],
     }
 
