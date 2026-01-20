@@ -17,6 +17,6 @@ urlpatterns = [
     path('payments/', PaymentListView.as_view(), name='payment-list'),
     path('payments/create/', CreatePaymentView.as_view(), name='payment-create'),
     path('payments/<int:payment_id>/status/', PaymentStatusView.as_view(), name='payment-status'),
-    path('success/', PaymentSuccessAPIView.as_view(), name='payment-success'),
-    path('cancel/', PaymentCancelAPIView.as_view(), name='payment-cancel'),
+    path('payments/success/', PaymentSuccessAPIView.as_view(), name='payment-success'),
+    path('payments/cancel/', PaymentCancelAPIView.as_view(), name='payment-cancel'),
 ] + router.urls

@@ -36,8 +36,8 @@ def create_stripe_checkout_session(price_id: str, product_id: str) -> dict:
                 'quantity': 1,
             }],
             mode='payment',
-            success_url='http://localhost:8000/success/',
-            cancel_url='http://localhost:8000/cancel/',
+            success_url='http://localhost:8000/api/payments/success/',
+            cancel_url='http://localhost:8000/api/payments/cancel/',
         )
         return {
             'session_id': session.id,
