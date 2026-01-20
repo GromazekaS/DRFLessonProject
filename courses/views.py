@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -27,6 +29,42 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.IsAuthenticated(), permissions.IsAdminUser()]  # Только админы
         return super().get_permissions()
+
+    def perform_update(self, serializer):
+        """
+        Расширенное обновление с отслеживанием изменений.
+        """
+        # Получаем данные до обновления
+        instance = self.get_object()
+        old_title = instance.title
+        old_description = instance.description
+
+        # Сохраняем изменения
+        updated_instance = serializer.save()
+
+        # Определяем, какие поля изменились
+        changed_fields = []
+
+        if old_title != updated_instance.title:
+            changed_fields.append('title')
+
+        if old_description != updated_instance.description:
+            changed_fields.append('description')
+
+        # Добавляем поле времени последнего обновления
+        updated_instance.last_updated = timezone.now()
+        updated_instance.save(update_fields=['last_updated'])
+
+        # Запускаем асинхронную задачу с информацией об изменениях
+        if changed_fields:  # Только если были реальные изменения
+            from .tasks import send_course_update_notifications_detailed
+            send_course_update_notifications_detailed.delay(
+                course_id=updated_instance.id,
+                changed_fields=changed_fields,
+                updated_by=self.request.user.id if self.request.user.is_authenticated else None
+            )
+            print(f"Обновлен курс '{updated_instance.title}'. Измененные поля: {changed_fields}")
+
 
 class LessonViewSet(viewsets.ModelViewSet):
     """
