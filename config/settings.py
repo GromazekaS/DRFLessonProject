@@ -121,7 +121,9 @@ DATABASES = {
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT')
+        'PORT': os.getenv('DB_PORT'),
+
+    'CONN_MAX_AGE': 0, # Для работы Celery
 
     }
 }
@@ -207,3 +209,5 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=10),  # Расписание выполнения задачи (например, каждые 10 минут)
     },
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

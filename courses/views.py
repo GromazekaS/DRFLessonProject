@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.utils import timezone
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.generics import get_object_or_404
@@ -19,15 +19,21 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     pagination_class = CustomPageNumberPagination  # Добавляем пагинацию
     # Разрешаем чтение всем, запись - только модераторам и админам
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsModeratorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly] # , IsModeratorOrReadOnly]
 
     def get_permissions(self):
         """
         Кастомизация: создавать курсы могут только суперпользователи или админы.
         Модераторам запрещено создавать (только редактировать существующие).
         """
+        print("Проверяем соответствие разрешение действию")
+        print(self.action)
         if self.action == 'create':
             return [permissions.IsAuthenticated(), permissions.IsAdminUser()]  # Только админы
+        if self.action == 'update':
+            print("И че там с разрешением?")
+            print(f"Аутонтификация:")
+            return [permissions.IsAuthenticated()]  # Правка
         return super().get_permissions()
 
     def perform_update(self, serializer):

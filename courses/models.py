@@ -1,5 +1,7 @@
 from django.db import models
+from django.utils import timezone
 from rest_framework import serializers
+from users.models import User
 
 
 class Course(models.Model):
@@ -12,6 +14,25 @@ class Course(models.Model):
         default=10000.00,
         verbose_name='Стоимость курса'
     )
+    created_at = models.DateTimeField(
+        default=timezone.now,  # Без скобок!
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        default=timezone.now,  # Без скобок!
+        verbose_name='Дата создания'
+    )
+    # ПОЛЯ ДЛЯ РАССЫЛКИ:
+    last_updated = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Время последнего обновления (для подписчиков)'
+    )
+    owner = models.ForeignKey(User,
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             related_name='owned_courses',
+                             verbose_name='Владелец')
     class Meta:
         verbose_name = 'Курс'
         verbose_name_plural = 'Курсы'
@@ -39,6 +60,7 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Subscription(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='Пользователь')
