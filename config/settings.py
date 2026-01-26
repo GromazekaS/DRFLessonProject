@@ -14,6 +14,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 # from django.conf.global_settings import AUTH_USER_MODEL
 from dotenv import load_dotenv
 
@@ -204,10 +205,10 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULE = {
-    'task-name': {
-        'task': 'courses.tasks.my_task',  # Путь к задаче
-        'schedule': timedelta(minutes=10),  # Расписание выполнения задачи (например, каждые 10 минут)
-    },
+    # 'block-inactive-users': {
+    #     'task': 'users.tasks.block_inactive_users',
+    #     'schedule': crontab(hour=2, minute=0),  # Каждый день в 2:00
+    # },
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

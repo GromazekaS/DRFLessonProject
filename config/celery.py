@@ -18,6 +18,7 @@ app = Celery('config')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
+# Мое расписание здесь!
 app.conf.beat_schedule = {
     # Блокировка неактивных пользователей каждый день в 2:00
     'block-inactive-users': {
