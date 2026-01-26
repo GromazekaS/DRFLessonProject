@@ -60,7 +60,7 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework_simplejwt.authentication.JWTAuthentication',
-            # 'rest_framework.authentication.SessionAuthentication', # Опционально
+            'rest_framework.authentication.SessionAuthentication', # Опционально
         ),
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.AllowAny', # По умолчанию требует аутентификации
