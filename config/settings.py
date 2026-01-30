@@ -11,10 +11,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
 from celery.schedules import crontab
+from django.conf.global_settings import CACHES
 # from django.conf.global_settings import AUTH_USER_MODEL
 from dotenv import load_dotenv
 
@@ -129,8 +131,14 @@ DATABASES = {
     }
 }
 
-
-# Password validation
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        }
+    }
+            # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -186,6 +194,12 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+    }
+}
 
 # Настройки для Celery
 
