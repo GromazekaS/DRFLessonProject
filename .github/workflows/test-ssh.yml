@@ -1,0 +1,23 @@
+name: Test SSH Connection
+
+on: [workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test SSH
+        run: |
+          # Записываем ключ в файл
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/test_key
+          chmod 600 ~/.ssh/test_key
+          
+          # Тестируем подключение
+          echo "Пробуем подключиться к ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}..."
+          
+          ssh -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=10 \
+              -i ~/.ssh/test_key \
+              ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
+              "echo '✅ Успех! Пользователь: \$(whoami), Docker: \$(docker --version 2>/dev/null || echo не установлен)'"
