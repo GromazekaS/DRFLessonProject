@@ -67,8 +67,17 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/courses:${{ github.sha }}
-          docker stop courses || true
-          docker rm courses || true
-          docker run -d --name courses -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/courses:${{ github.sha }}
+            # Проверим, установлен ли Docker, и установим его при необходимости
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              sudo apt update
+              sudo apt install -y docker.io
+              sudo systemctl enable docker
+              sudo systemctl start docker
+            fi
+            # Далее идут ваши оригинальные команды деплоя
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/courses:${{ github.sha }}
+            docker stop courses || true
+            docker rm courses || true
+            docker run -d --name courses -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/courses:${{ github.sha }}
           EOF
