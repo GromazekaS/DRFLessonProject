@@ -28,3 +28,17 @@ jobs:
       - name: Test SSH access
         run: |
           timeout 5 ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "echo 'Success'" || echo "Still failing"
+
+      - name: Диагностика SSH на сервере
+        run: |
+          echo "=== Проверяем логи SSH (последние ошибки) ==="
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo tail -50 /var/log/auth.log | grep -i sshd"
+          
+          echo "=== Проверяем наличие и содержимое authorized_keys ==="
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "cat ~/.ssh/authorized_keys"
+          
+          echo "=== Проверяем критические настройки sshd_config ==="
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo grep -E '^(PubkeyAuthentication|AuthorizedKeysFile|AllowUsers|DenyUsers|PasswordAuthentication|PermitRootLogin)' /etc/ssh/sshd_config"
+          
+          echo "=== Проверяем, не заблокирован ли IP через fail2ban или похожие сервисы ==="
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo which fail2ban-client && sudo fail2ban-client status sshd || echo 'Fail2ban не установлен'"
