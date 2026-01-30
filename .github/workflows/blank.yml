@@ -29,53 +29,6 @@ jobs:
         run: |
           timeout 5 ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "echo 'Success'" || echo "Still failing"
 
-      - name: Восстановить SSH доступ с обоими ключами
-        run: |
-          echo "=== Получаем публичный ключ из приватного в GitHub Secrets ==="
-          # Извлекаем публичный ключ из приватного (который в секрете SSH_KEY)
-          # Для этого временно сохраняем приватный ключ в файл
-          PRIVATE_KEY_PATH="/tmp/gh_private_key"
-          echo "${{ secrets.SSH_KEY }}" > "$PRIVATE_KEY_PATH"
-          chmod 600 "$PRIVATE_KEY_PATH"
-          # Извлекаем публичную часть
-          GH_PUB_KEY=$(ssh-keygen -y -f "$PRIVATE_KEY_PATH")
-          echo "Публичный ключ GitHub Actions:"
-          echo "$GH_PUB_KEY"
-          # Удаляем временный файл
-          rm -f "$PRIVATE_KEY_PATH"
-          
-          # Ваш локальный публичный ключ (который вы получили)
-          LOCAL_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+9aj3X/sW2eG8isGOr7kSyu2KAZE+FlBIT0uCUqIdWzgUCfYzwdHpp6d68g8vPsIVdpBGd8+QbujiqCJ13YFg62J5k25BuJC28Vzb3JgyltyvkUvxdXNxy31k8yLezSeA8yc4bKG67iZ4so25af0RdvZB7OKWWOIPIhZOdTNBhNOwE8zxHDPVrtQos4eyTu6DdCboEWxmWYjsWmU6cPR1IRKtHzP5i/1hqo5G1k/UlqxEqrJAcqEEOrWMaTZ+reQS4046xcfFjIpnK9u2FOy30fAnpeHOjza0dJKCpGev/rtS83bv8pd7Jx9/efifoEmLcgmJboCS7ccpjLJ3SogX"
-          
-          echo "=== Восстанавливаем authorized_keys с обоими ключами ==="
-          # Создаем новый authorized_keys с обоими ключами
-          FULL_AUTH_KEYS="$GH_PUB_KEY github-actions-key
-          $LOCAL_PUB_KEY local-windows-key"
-                    
-                    echo "Содержимое authorized_keys:"
-                    echo "$FULL_AUTH_KEYS"
-                    
-                    # Используем временный файл и команду cat для записи
-                    ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
-                      echo '$FULL_AUTH_KEYS' > ~/.ssh/authorized_keys.tmp
-                      mv ~/.ssh/authorized_keys.tmp ~/.ssh/authorized_keys
-                      chmod 600 ~/.ssh/authorized_keys
-                      echo '=== Проверяем итоговый файл ==='
-                      cat ~/.ssh/authorized_keys
-                    "
-                    
-                    echo "=== Проверяем подключение с ключом GitHub Actions ==="
-                    # Тестируем подключение (оно должно работать)
-                    ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "echo '✅ Успешное подключение из GitHub Actions!'"
-                    
-                    echo "=== Проверяем группы пользователя ==="
-                    ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
-                      echo 'Группы пользователя:'
-                      groups
-                      echo 'Если нет группы docker (GID 113), добавляем:'
-                      sudo usermod -aG docker \$USER 2>/dev/null || echo 'Пользователь уже в группе docker'
-                    "
-          
       - name: Диагностика SSH на сервере
         run: |
           echo "=== Проверяем логи SSH (последние ошибки) ==="
@@ -89,3 +42,26 @@ jobs:
           
           echo "=== Проверяем, не заблокирован ли IP через fail2ban или похожие сервисы ==="
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo which fail2ban-client && sudo fail2ban-client status sshd || echo 'Fail2ban не установлен'"
+
+
+      - name: Диагностика работы приложения
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            echo "=== 1. Статус контейнера ==="
+            sudo docker ps -a | grep courses
+            
+            echo "=== 2. Логи контейнера (последние 20 строк) ==="
+            sudo docker logs courses --tail 20 2>&1
+            
+            echo "=== 3. Проверка портов в контейнере ==="
+            sudo docker exec courses sh -c "netstat -tulpn 2>/dev/null | grep LISTEN" || echo "Не удалось проверить порты"
+            
+            echo "=== 4. Проверка портов на хосте ==="
+            sudo netstat -tulpn | grep :80
+            
+            echo "=== 5. Проверка доступа к приложению изнутри контейнера ==="
+            sudo docker exec courses curl -f http://localhost:8000 || echo "Внутри контейнера приложение не отвечает"
+            
+            echo "=== 6. Проверка доступа снаружи (локально) ==="
+            curl -f -m 5 http://${{ secrets.SERVER_IP }} || echo "Внешний запрос не прошел"
+          EOF
