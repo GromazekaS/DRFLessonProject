@@ -29,6 +29,39 @@ jobs:
         run: |
           timeout 5 ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "echo 'Success'" || echo "Still failing"
 
+      - name: Исправить SSH доступ и права Docker
+        run: |
+          # 1. Получаем публичный ключ, который используется прямо сейчас в GitHub Actions (этот ключ уже работает)
+          echo "Ключ из текущего SSH-агента:"
+          # Этот ключ уже есть в authorized_keys на сервере, так как подключение работает
+          
+          # 2. Проверяем и исправляем права на папку .ssh и файл authorized_keys
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
+            echo '=== Исправляем права .ssh ==='
+            mkdir -p ~/.ssh
+            chmod 700 ~/.ssh
+            touch ~/.ssh/authorized_keys
+            chmod 600 ~/.ssh/authorized_keys
+            echo 'Права исправлены'
+            
+            echo '=== Содержимое authorized_keys (первые 5 строк) ==='
+            head -5 ~/.ssh/authorized_keys
+            
+            echo '=== Проверяем настройки SSH-демона (ключевые параметры) ==='
+            sudo grep -E '^(PubkeyAuthentication|AllowUsers|DenyUsers)' /etc/ssh/sshd_config 2>/dev/null || echo 'Нет доступа к sshd_config'
+            
+            echo '=== Проверяем группу docker для текущего пользователя ==='
+            groups
+          "
+          
+          # 3. Добавляем ВАШ локальный публичный ключ на сервер (ЗАМЕНИТЕ ЭТОТ КЛЮЧ НА ВАШ!)
+          # Получите его командой на своей Windows: ssh-keygen -y -f C:\Users\Kinst\.ssh\ssh-key-1769770633530
+          echo "=== Добавляем локальный ключ на сервер ==="
+          # УДАЛИТЕ СТРОКУ НИЖЕ И ВСТАВЬТЕ ВАШ КЛЮЧ, НАЧИНАЯ С ssh-rsa
+          LOCAL_PUB_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+9aj3X/sW2eG8isGOr7kSyu2KAZE+FlBIT0uCUqIdWzgUCfYzwdHpp6d68g8vPsIVdpBGd8+QbujiqCJ13YFg62J5k25BuJC28Vzb3JgyltyvkUvxdXNxy31k8yLezSeA8yc4bKG67iZ4so25af0RdvZB7OKWWOIPIhZOdTNBhNOwE8zxHDPVrtQos4eyTu6DdCboEWxmWYjsWmU6cPR1IRKtHzP5i/1hqo5G1k/UlqxEqrJAcqEEOrWMaTZ+reQS4046xcfFjIpnK9u2FOy30fAnpeHOjza0dJKCpGev/rtS83bv8pd7Jx9/efifoEmLcgmJboCS7ccpjLJ3SogX"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "grep -qxF '$LOCAL_PUB_KEY' ~/.ssh/authorized_keys || echo '$LOCAL_PUB_KEY' >> ~/.ssh/authorized_keys"
+          echo "Локальный ключ добавлен (если его ещё не было)"
+          
       - name: Диагностика SSH на сервере
         run: |
           echo "=== Проверяем логи SSH (последние ошибки) ==="
