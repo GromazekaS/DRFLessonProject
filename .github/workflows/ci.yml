@@ -20,6 +20,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          SECRET_KEY=test-secret-key-for-ci-$(openssl rand -hex 32)
+          DEBUG=0
+          DB_NAME=test_db
+          DB_USER=test_user
+          DB_PASSWORD=test_password
+          DB_HOST=localhost
+          DB_PORT=5432
+          REDIS_HOST=localhost
+          REDIS_PORT=6379
+          CELERY_BROKER_URL=redis://localhost:6379/0
+          CELERY_RESULT_BACKEND=redis://localhost:6379/0
+          EOF
       - name: Run tests
         run: python manage.py test
 
