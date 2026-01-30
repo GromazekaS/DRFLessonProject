@@ -21,3 +21,27 @@ jobs:
               -i ~/.ssh/test_key \
               ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
               "echo '✅ Успех! Пользователь: \$(whoami), Docker: \$(docker --version 2>/dev/null || echo не установлен)'"
+
+      - name: Проверка контейнера и портов
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            echo "=== 1. Проверяем Docker ==="
+            docker --version || echo "Docker не установлен"
+            
+            echo "=== 2. Проверяем запущенные контейнеры ==="
+            docker ps -a
+            
+            echo "=== 3. Проверяем порт 80 на хосте ==="
+            sudo netstat -tulpn | grep :80 || echo "Порт 80 не слушается"
+            
+            echo "=== 4. Проверяем порт 8000 в контейнере (если есть) ==="
+            if docker ps | grep -q courses; then
+              echo "Контейнер courses запущен, проверяем порты:"
+              docker exec courses sh -c "netstat -tulpn 2>/dev/null | grep LISTEN" || echo "Не удалось проверить порты в контейнере"
+            else
+              echo "Контейнер courses не запущен"
+            fi
+            
+            echo "=== 5. Проверяем Security Groups (нужны root права) ==="
+            sudo iptables -L -n | grep -E "(80|8000)" || echo "Правила iptables не найдены"
+          EOF
