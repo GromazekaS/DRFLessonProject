@@ -8,10 +8,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@{{ secrets.SERVER_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/courses:${{ github.sha }}
           docker stop courses || true
           docker rm courses || true
