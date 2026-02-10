@@ -5,3 +5,17 @@ venv
 __pycache__
 *.pyc
 test_db.sqlite3
+
+*.pyo
+*.pyd
+.Python
+.venv
+env/
+.idea
+*.log
+*.sqlite3
+media
+staticfiles
+.DS_Store
+*.swp
+*.swo
