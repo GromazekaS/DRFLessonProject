@@ -15,28 +15,28 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # migrations.AddField(
-        #     model_name='course',
-        #     name='owner',
-        #     field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='owned_courses', to=settings.AUTH_USER_MODEL, verbose_name='Владелец'),
-        # ),
-        # # migrations.AddField(
-        # #     model_name='lesson',
-        # #     name='course',
-        # #     field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='courses.course', verbose_name='Курс'),
-        # # ),
-        # migrations.AddField(
-        #     model_name='subscription',
-        #     name='course',
-        #     field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courses.course', verbose_name='Курс'),
-        # ),
-        # migrations.AddField(
-        #     model_name='subscription',
-        #     name='user',
-        #     field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
-        # ),
-        # migrations.AlterUniqueTogether(
-        #     name='subscription',
-        #     unique_together={('user', 'course')},
-        # ),
+        migrations.AddField(
+            model_name='course',
+            name='owner',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='owned_courses', to=settings.AUTH_USER_MODEL, verbose_name='Владелец'),
+        ),
+        migrations.AddField(
+            model_name='lesson',
+            name='course',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='courses.course', verbose_name='Курс'),
+        ),
+        migrations.AddField(
+            model_name='subscription',
+            name='course',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courses.course', verbose_name='Курс'),
+        ),
+        migrations.AddField(
+            model_name='subscription',
+            name='user',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='subscription',
+            unique_together={('user', 'course')},
+        ),
     ]
