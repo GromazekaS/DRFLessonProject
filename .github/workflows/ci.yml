@@ -60,72 +60,74 @@ jobs:
       - name: Push Docker image in Docker hub
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
+deploy:
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: Check out code
+      uses: actions/checkout@v3
 
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_KEY_AUTO }}
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY_AUTO }}
+    - name: Create target directories on server
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} \
+          "mkdir -p /home/${{ secrets.SSH_USER_AUTO }}/drfapp/nginx"
 
-      - name: Create target directories on server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} \
-            "mkdir -p /home/${{ secrets.SSH_USER_AUTO }}/drfapp/nginx"
+    - name: Copy docker-compose.yml
+      run: |
+        scp -o StrictHostKeyChecking=no docker-compose.yml \
+          ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/
 
-      - name: Copy docker-compose.yml
-        run: |
-          scp -o StrictHostKeyChecking=no docker-compose.yml \
-            ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/
+    - name: Fix docker-compose.yml - use pre-built images (all)
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
+          cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
+          sed -i "s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}|g" docker-compose.yml
+        EOF
 
-      - name: Fix docker-compose.yml - use pre-built image
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
-            cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
-            sed -i "s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}|" docker-compose.yml
-          EOF
+    - name: Copy nginx configuration
+      run: |
+        rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
+          ./nginx/ \
+          ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/nginx/
 
-      - name: Copy nginx configuration
-        run: |
-          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
-            ./nginx/ \
-            ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/nginx/
+    - name: Generate .env file on server from secrets
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
+          cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
+          cat > .env << ENV
+DEBUG=0
+SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+ALLOWED_HOSTS=${{ secrets.SERVER_IP_AUTO }}
+DB_NAME=drfapp
+DB_USER=drfapp
+DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+DB_HOST=db
+DB_PORT=5432
+REDIS_URL=redis://redis:6379/0
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
+DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
+GITHUB_SHA=${{ github.sha }}
+SERVER_IP=${{ secrets.SERVER_IP_AUTO }}
+ENV
+        EOF
 
-      - name: Generate .env file on server from secrets
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
-            cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
-            cat > .env << ENV
-              DEBUG=0
-              SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
-              ALLOWED_HOSTS=${{ secrets.SERVER_IP_AUTO }}
-              DB_NAME=drfapp
-              DB_USER=drfapp
-              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-              DB_HOST=db
-              DB_PORT=5432
-              REDIS_URL=redis://redis:6379/0
-              CELERY_BROKER_URL=redis://redis:6379/0
-              CELERY_RESULT_BACKEND=redis://redis:6379/0
-              DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
-              GITHUB_SHA=${{ github.sha }}
-              SERVER_IP=${{ secrets.SERVER_IP_AUTO }}
-              ENV
-          EOF
-
-      - name: Deploy with docker-compose
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
-            cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
-            # Останавливаем и удаляем старые контейнеры (volumes сохраняются)
-            docker-compose down
-            # Скачиваем свежие образы для сервисов, собранных в CI
-            docker-compose pull web celery_worker celery_beat
-            # Запускаем весь стек
-            docker-compose up -d
-          EOF
+    - name: Deploy with docker-compose
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
+          cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
+          # Удаляем старый ручной контейнер, если мешает
+          docker stop drfapp || true
+          docker rm drfapp || true
+          # Останавливаем старый compose стек
+          docker-compose down
+          # Скачиваем свежие образы
+          docker-compose pull web celery_worker celery_beat
+          # Запускаем новый стек
+          docker-compose up -d
+        EOF
