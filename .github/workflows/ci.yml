@@ -49,7 +49,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions.checkout@v3
+        uses: actions/checkout@v3
 
       - name: Login in DockerHub
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
