@@ -55,10 +55,10 @@ jobs:
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}
 
       - name: Push Docker image in Docker hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}
 
   deploy:
     needs: build
@@ -68,13 +68,13 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+          ssh-private-key: ${{ secrets.SSH_KEY_AUTO }}
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
-          docker stop myapp || true
-          docker rm myapp || true
-          docker run -d --name myapp -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}
+          docker stop drfapp || true
+          docker rm drfapp || true
+          docker run -d --name drfapp -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}
           EOF
