@@ -2,14 +2,14 @@ from django.utils import timezone
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Course, Lesson, Subscription
 from .pagination import CustomPageNumberPagination
 from .serializers import CourseSerializer, LessonSerializer
-from users.permissions import IsModeratorOrReadOnly  # Импортируем созданное право
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     """
@@ -19,7 +19,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     pagination_class = CustomPageNumberPagination  # Добавляем пагинацию
     # Разрешаем чтение всем, запись - только модераторам и админам
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly] # , IsModeratorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # , IsModeratorOrReadOnly]
 
     def get_permissions(self):
         """
@@ -32,7 +32,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated(), permissions.IsAdminUser()]  # Только админы
         if self.action == 'update':
             print("И че там с разрешением?")
-            print(f"Аутонтификация:")
+            print("Аутонтификация:")
             return [permissions.IsAuthenticated()]  # Правка
         return super().get_permissions()
 
@@ -86,7 +86,7 @@ class LessonViewSet(viewsets.ModelViewSet):
         Аналогично курсам: создавать уроки могут только админы.
         """
         if self.request.method in ['POST', 'PUT', 'PATCH']:
-            return [] # [permissions.IsAuthenticated()] #, permissions.IsAdminUser()]
+            return []  # [permissions.IsAuthenticated()] #, permissions.IsAdminUser()]
         return [permissions.IsAuthenticated()]
 
 

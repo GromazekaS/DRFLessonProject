@@ -32,7 +32,7 @@ def send_course_update_notifications_detailed(course_id, changed_fields=None, up
         # for subscription in subscriptions:
         user = User.objects.get(id=updated_by)
         if user.email:
-            print(f"=== Уведомление отправлено ===")
+            print("=== Уведомление отправлено ===")
             print(f"Кому: {user.email}")
             print(f"Тема: Обновление курса '{course.title}'")
 

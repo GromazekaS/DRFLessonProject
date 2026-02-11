@@ -1,19 +1,16 @@
-from django.db.models import Prefetch
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 
 from .models import Payment, User
 from courses.models import Course
-from .serializers import PaymentSerializer, UserSerializer
+from .serializers import PaymentSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
-from .filters import PaymentFilter
 from rest_framework import viewsets, permissions, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
-# from django.contrib.auth.models import Group
 from .serializers import UserSerializer, UserPublicSerializer
-from .permissions import IsModerator, IsOwner  # Импортируем кастомные права
+from .permissions import IsModerator
 from .services.stripe import (
     create_stripe_product,
     create_stripe_price,
@@ -167,6 +164,7 @@ class CreatePaymentView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=400)
 
+
 class PaymentStatusView(APIView):
     """Проверка статуса платежа"""
     permission_classes = [permissions.IsAuthenticated]
@@ -189,6 +187,7 @@ class PaymentStatusView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=400)
 
+
 class PaymentListView(generics.ListAPIView):
     """Список платежей пользователя"""
     serializer_class = PaymentSerializer
@@ -196,6 +195,7 @@ class PaymentListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Payment.objects.filter(user=self.request.user).order_by('-payment_date')
+
 
 class PaymentSuccessAPIView(APIView):
     """API эндпоинт для успешной оплаты"""
@@ -207,6 +207,7 @@ class PaymentSuccessAPIView(APIView):
             'message': 'Платеж успешно завершен. Спасибо за покупку!',
             'instruction': 'Вы можете проверить статус платежа в личном кабинете'
         })
+
 
 class PaymentCancelAPIView(APIView):
     """API эндпоинт для отмены оплаты"""

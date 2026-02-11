@@ -1,6 +1,5 @@
-# permissions.py (например, в папке приложения users)
 from rest_framework import permissions
-from django.contrib.auth.models import Group
+
 
 class IsModerator(permissions.BasePermission):
     """
@@ -15,6 +14,7 @@ class IsModerator(permissions.BasePermission):
                 request.user.is_staff or
                 request.user.is_superuser)
 
+
 class IsOwner(permissions.BasePermission):
     """
     Разрешает доступ только владельцу объекта.
@@ -27,6 +27,7 @@ class IsOwner(permissions.BasePermission):
             return True
         # Сравниваем владельца объекта с текущим пользователем
         return getattr(obj, 'user', None) == request.user
+
 
 class IsModeratorOrReadOnly(permissions.BasePermission):
     """

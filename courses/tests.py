@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from courses.models import Course, Lesson, Subscription
+from courses.models import Course, Lesson
 
 User = get_user_model()
 
@@ -110,54 +110,3 @@ class SubscriptionTests(APITestCase):
         response = self.client.post(self.subscribe_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.data['is_subscribed'])
-
-
-# class DebugURLs(APITestCase):
-#     """
-#     Тест для проверки доступных URL.
-#     """
-#
-#     def test_available_urls(self):
-#         """Проверяем, какие URL доступны."""
-#         print("\n=== Доступные URL ===")
-#
-#         try:
-#             url = reverse('courses:lesson-list')
-#             print(f"✅ lesson-list: {url}")
-#         except Exception as e:
-#             print(f"❌ lesson-list: {e}")
-#
-#         try:
-#             url = reverse('lesson-detail', args=[1])
-#             print(f"✅ lesson-detail: {url}")
-#         except Exception as e:
-#             print(f"❌ lesson-detail: {e}")
-#
-#         try:
-#             url = reverse('course-list')
-#             print(f"✅ course-list: {url}")
-#         except Exception as e:
-#             print(f"❌ course-list: {e}")
-#
-#         try:
-#             url = reverse('course-detail', args=[1])
-#             print(f"✅ course-detail: {url}")
-#         except Exception as e:
-#             print(f"❌ course-detail: {e}")
-#
-#         try:
-#             url = reverse('course-subscription', args=[1])
-#             print(f"✅ course-subscription: {url}")
-#         except Exception as e:
-#             print(f"❌ course-subscription: {e}")
-#
-#         try:
-#             url = reverse('my-subscriptions')
-#             print(f"✅ my-subscriptions: {url}")
-#         except Exception as e:
-#             print(f"❌ my-subscriptions: {e}")
-#
-#         print("=" * 40)
-#
-# # Запустите этот тест отдельно
-# # python manage.py test courses.tests.DebugURLs -v 2
