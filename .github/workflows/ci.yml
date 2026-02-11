@@ -99,22 +99,22 @@ deploy:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
           cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
-          cat > .env << ENV
-DEBUG=0
-SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
-ALLOWED_HOSTS=${{ secrets.SERVER_IP_AUTO }}
-DB_NAME=drfapp
-DB_USER=drfapp
-DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-DB_HOST=db
-DB_PORT=5432
-REDIS_URL=redis://redis:6379/0
-CELERY_BROKER_URL=redis://redis:6379/0
-CELERY_RESULT_BACKEND=redis://redis:6379/0
-DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
-GITHUB_SHA=${{ github.sha }}
-SERVER_IP=${{ secrets.SERVER_IP_AUTO }}
-ENV
+          cat > .env << 'ENV'
+          DEBUG=0
+          SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+          ALLOWED_HOSTS=${{ secrets.SERVER_IP_AUTO }}
+          DB_NAME=drfapp
+          DB_USER=drfapp
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=db
+          DB_PORT=5432
+          REDIS_URL=redis://redis:6379/0
+          CELERY_BROKER_URL=redis://redis:6379/0
+          CELERY_RESULT_BACKEND=redis://redis:6379/0
+          DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
+          GITHUB_SHA=${{ github.sha }}
+          SERVER_IP=${{ secrets.SERVER_IP_AUTO }}
+          ENV
         EOF
 
     - name: Deploy with docker-compose
