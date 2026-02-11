@@ -70,11 +70,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY_AUTO }}
 
-      - name: Deploy to server
+      - name: Copy compose files to server
+        run: |
+          scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/
+          scp -o StrictHostKeyChecking=no .env.example ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/.env   # или генерируйте .env через secrets
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./nginx/ ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/nginx/
+
+      - name: Deploy with docker-compose
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}
-          docker stop drfapp || true
-          docker rm drfapp || true
-          docker run -d --name drfapp -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/drfapp:${{ github.sha }}
+            cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
+            echo "DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> .env
+            echo "GITHUB_SHA=${{ github.sha }}" >> .env
+            echo "SERVER_IP=${{ secrets.SERVER_IP_AUTO }}" >> .env
+            # добавьте другие переменные (DB_PASSWORD, SECRET_KEY и т.д.)
+            docker-compose pull web
+            docker-compose up -d
           EOF
