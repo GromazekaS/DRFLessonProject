@@ -73,6 +73,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY_AUTO }}
 
+      - name: Create target directories on server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} \
+            "mkdir -p /home/${{ secrets.SSH_USER_AUTO }}/drfapp/nginx"
+            
       - name: Copy compose files to server
         run: |
           scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/
