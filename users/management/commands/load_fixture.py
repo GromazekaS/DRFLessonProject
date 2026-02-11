@@ -57,7 +57,7 @@ class Command(BaseCommand):
             self.stdout.write("\n📋 Попробуйте:")
             self.stdout.write(f'1. Проверить JSON: python -m json.tool {fixture_path}')
             self.stdout.write(f'2. Загрузить с детализацией: python manage.py loaddata {fixture_name} --verbosity 3')
-            self.stdout.write(f'3. Создать тестовую фикстуру: python manage.py create_test_fixture')
+            self.stdout.write('3. Создать тестовую фикстуру: python manage.py create_test_fixture')
 
     def flush_data(self):
         """Очистка данных"""
