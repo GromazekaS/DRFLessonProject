@@ -1,6 +1,6 @@
 name: DRFProject CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   lint:
@@ -122,6 +122,10 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }} << 'EOF'
             cd /home/${{ secrets.SSH_USER_AUTO }}/drfapp
-            docker-compose pull web
+            # Останавливаем и удаляем старые контейнеры (volumes сохраняются)
+            docker-compose down
+            # Скачиваем свежие образы для сервисов, собранных в CI
+            docker-compose pull web celery_worker celery_beat
+            # Запускаем весь стек
             docker-compose up -d
           EOF
