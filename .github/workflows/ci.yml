@@ -65,6 +65,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -73,7 +76,7 @@ jobs:
       - name: Copy compose files to server
         run: |
           scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/
-          scp -o StrictHostKeyChecking=no .env.example ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/.env   # или генерируйте .env через secrets
+          scp -o StrictHostKeyChecking=no .env.example ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/.env
           rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./nginx/ ${{ secrets.SSH_USER_AUTO }}@${{ secrets.SERVER_IP_AUTO }}:/home/${{ secrets.SSH_USER_AUTO }}/drfapp/nginx/
 
       - name: Deploy with docker-compose
